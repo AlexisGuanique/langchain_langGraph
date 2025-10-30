@@ -102,15 +102,19 @@ with st.sidebar:
     # Usar la API key del session_state si está disponible, sino usar la de entorno
     api_key = st.session_state.openai_api_key if st.session_state.openai_api_key else os.getenv("OPENAI_API_KEY")
     
+    # Inicializar chat_model como None
+    chat_model = None
+    
     if api_key:
-        chat_model = ChatOpenAI(
-            model=model_name, 
-            temperature=temperature,
-            openai_api_key=api_key
-        )
-    else:
-        # Si no hay API key, crear el modelo sin especificarla (usará la de entorno si existe)
-        chat_model = ChatOpenAI(model=model_name, temperature=temperature)
+        try:
+            chat_model = ChatOpenAI(
+                model=model_name, 
+                temperature=temperature,
+                openai_api_key=api_key
+            )
+        except Exception as e:
+            st.error(f"Error al configurar el modelo: {str(e)}")
+            chat_model = None
 
     # Separador visual
     st.divider()
@@ -177,8 +181,21 @@ for message in st.session_state.messages:
         st.markdown(message.content)
 
 
-# Cuadro de entrada de texto para el usuario
+# Verificar si hay API key configurada antes de permitir el chat
+if not chat_model:
+    st.warning("⚠️ **Configuración requerida**")
+    st.info("""
+    📝 **Por favor configura tu API Key de OpenAI para usar el chatbot.**
+    
+    1. Ve al sidebar (menú lateral izquierdo)
+    2. Ingresa tu API Key en el campo "Ingresa tu API Key"
+    3. Haz clic en "💾 Guardar API Key"
+    
+    Si no tienes una API Key, puedes obtenerla en: https://platform.openai.com/api-keys
+    """)
+    st.stop()
 
+# Cuadro de entrada de texto para el usuario
 pregunta = st.chat_input("Escribe tu mensaje: ")
 
 if pregunta:
