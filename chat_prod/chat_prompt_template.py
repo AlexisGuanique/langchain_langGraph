@@ -4,10 +4,10 @@ from langchain_openai import ChatOpenAI
 
 # Ahora importamos las clases las cuales derivan de la clase BaseMessage, estas clases indican el rol del mensaje.
 # AIMessage es el mensaje de la IA, HumanMessage es el mensaje del usuario, SystemMessage es el mensaje del sistema.
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 # Importamos ChatPromptTemplate para crear prompts de chat (system/human)
-from langchain.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 
 # Libreria de python para crear interfaces de usuario.
 import streamlit as st
