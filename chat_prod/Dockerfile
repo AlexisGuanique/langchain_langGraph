@@ -29,7 +29,7 @@ ENV STREAMLIT_SERVER_HEADLESS=true
 
 # Variable de entorno para Google Gemini API Key (debe ser proporcionada al ejecutar el contenedor)
 # Ejemplo: docker run -e GOOGLE_API_KEY=tu_api_key_aqui ...
-ENV GOOGLE_API_KEY="AIzaSyBT5fu3_bUVMbmL-NzafoCOKXPgdCGGriM"
+# NO poner la API key aquí por seguridad
 
 # Comando para ejecutar Streamlit
 CMD ["streamlit", "run", "chat_prompt_template.py", "--server.port=8501", "--server.address=0.0.0.0"]
