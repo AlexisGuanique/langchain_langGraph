@@ -1,6 +1,6 @@
 # Importamos las librerias necesarias
 
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 # Ahora importamos las clases las cuales derivan de la clase BaseMessage, estas clases indican el rol del mensaje.
 # AIMessage es el mensaje de la IA, HumanMessage es el mensaje del usuario, SystemMessage es el mensaje del sistema.
@@ -31,43 +31,11 @@ st.markdown(
 with st.sidebar:
     st.header("Configuración")
     
-    # Configuración de API Key
-    st.subheader("🔑 API Key de OpenAI")
-    
-    # Inicializar API key en session_state si no existe
-    if "openai_api_key" not in st.session_state:
-        st.session_state.openai_api_key = os.getenv("OPENAI_API_KEY", "")
-    
-    # Campo para ingresar la API key (tipo password para ocultarla)
-    api_key_input = st.text_input(
-        "Ingresa tu API Key",
-        value=st.session_state.openai_api_key,
-        type="password",
-        help="Ingresa tu API Key de OpenAI. Si no tienes una, obtén una en https://platform.openai.com/api-keys",
-        placeholder="sk-..."
-    )
-    
-    # Botón para guardar la API key
-    if st.button("💾 Guardar API Key", use_container_width=True):
-        if api_key_input:
-            st.session_state.openai_api_key = api_key_input
-            os.environ["OPENAI_API_KEY"] = api_key_input
-            st.success("✅ API Key guardada correctamente!")
-            st.rerun()
-        else:
-            st.warning("⚠️ Por favor ingresa una API Key válida")
-    
-    # Mostrar estado de la API key
-    if st.session_state.openai_api_key:
-        st.info("✅ API Key configurada")
-    else:
-        st.warning("⚠️ No hay API Key configurada")
-    
     st.divider()
     
     temperature = st.slider("Temperatura", 0.0, 1.0, 0.5, 0.1)
     model_name = st.selectbox(
-        "Modelo", ["gpt-3.5-turbo", "gpt-4", "gpt-4o-mini"])
+        "Modelo", ["gemini-2.5-flash", "gemini-pro", "gemini-1.5-pro"])
 
     # Personalidad configurable
     personalidad = st.selectbox(
@@ -99,18 +67,17 @@ with st.sidebar:
     )
 
     # Recrear el modelo con los nuevos parámetros
-    # Usar la API key del session_state si está disponible, sino usar la de entorno
-    api_key = st.session_state.openai_api_key if st.session_state.openai_api_key else os.getenv("OPENAI_API_KEY")
+    # La API key se obtiene de la variable de entorno GOOGLE_API_KEY
+    api_key = os.getenv("GOOGLE_API_KEY")
     
     # Inicializar chat_model como None
     chat_model = None
     
     if api_key:
         try:
-            chat_model = ChatOpenAI(
+            chat_model = ChatGoogleGenerativeAI(
                 model=model_name, 
-                temperature=temperature,
-                openai_api_key=api_key
+                temperature=temperature
             )
         except Exception as e:
             st.error(f"Error al configurar el modelo: {str(e)}")
@@ -185,13 +152,16 @@ for message in st.session_state.messages:
 if not chat_model:
     st.warning("⚠️ **Configuración requerida**")
     st.info("""
-    📝 **Por favor configura tu API Key de OpenAI para usar el chatbot.**
+    📝 **La API Key de Google Gemini debe estar configurada como variable de entorno.**
     
-    1. Ve al sidebar (menú lateral izquierdo)
-    2. Ingresa tu API Key en el campo "Ingresa tu API Key"
-    3. Haz clic en "💾 Guardar API Key"
+    Configura la variable de entorno `GOOGLE_API_KEY` en el contenedor Docker.
     
-    Si no tienes una API Key, puedes obtenerla en: https://platform.openai.com/api-keys
+    Ejemplo:
+    ```bash
+    docker run -d -p 8501:8501 -e GOOGLE_API_KEY=tu_api_key_aqui --name chatbot chatbot-streamlit
+    ```
+    
+    Si no tienes una API Key, puedes obtenerla en: https://makersuite.google.com/app/apikey
     """)
     st.stop()
 
@@ -254,4 +224,4 @@ if pregunta:
     except Exception as e:
         # Manejo de errores: capturamos cualquier excepción durante la generación
         st.error(f"Error al generar respuesta: {str(e)}")
-        st.info("Verifica que tu API Key de OpenAI esté configurada correctamente.")
+        st.info("Verifica que tu API Key de Google Gemini esté configurada correctamente.")
